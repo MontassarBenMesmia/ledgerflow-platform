@@ -12,5 +12,5 @@ jobs:
       - uses: docker/metadata-action@v5
         id: meta
         with: { images: "ghcr.io/montassarbenmesmia/ledgerflow-${{ matrix.component }}", tags: 'type=semver,pattern={{version}}' }
-      - uses: docker/build-push-action@v6
+      - uses: docker/build-push-action@v7
         with: { context: ., file: "${{ matrix.component }}/Dockerfile", push: true, tags: "${{ steps.meta.outputs.tags }}", labels: "${{ steps.meta.outputs.labels }}" }
