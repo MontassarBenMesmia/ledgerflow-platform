@@ -1,0 +1,12 @@
+.git
+.github
+.idea
+.vscode
+.env
+**/target
+**/node_modules
+**/dist
+**/.angular
+infra/terraform/.terraform
+*.log
+docs/screenshots

@@ -1,0 +1,28 @@
+asyncapi: 3.0.0
+info:
+  title: LedgerFlow transfer events
+  version: 1.0.0
+  description: Contract emitted after a balanced transfer commits to the ledger.
+channels:
+  transferCompleted:
+    address: ledger.transfer.events
+    messages:
+      transferCompleted:
+        payload:
+          type: object
+          required: [eventId, transferId, sourceAccountId, destinationAccountId, amount, currency, debitAmount, creditAmount, initiatedBy, occurredAt]
+          properties:
+            eventId: { type: string, format: uuid }
+            transferId: { type: string, format: uuid }
+            sourceAccountId: { type: string, format: uuid }
+            destinationAccountId: { type: string, format: uuid }
+            amount: { type: number, multipleOf: 0.01 }
+            currency: { type: string, pattern: '^[A-Z]{3}$' }
+            debitAmount: { type: number }
+            creditAmount: { type: number }
+            initiatedBy: { type: string }
+            occurredAt: { type: string, format: date-time }
+operations:
+  consumeTransferCompleted:
+    action: receive
+    channel: { $ref: '#/channels/transferCompleted' }

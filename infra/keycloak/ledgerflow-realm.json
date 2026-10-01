@@ -1,0 +1,28 @@
+{
+  "realm": "ledgerflow",
+  "enabled": true,
+  "displayName": "LedgerFlow",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "roles": { "realm": [{"name":"OPERATOR"},{"name":"AUDITOR"}] },
+  "clients": [{
+    "clientId": "ledgerflow-web",
+    "name": "LedgerFlow Dashboard",
+    "enabled": true,
+    "publicClient": true,
+    "standardFlowEnabled": true,
+    "directAccessGrantsEnabled": true,
+    "redirectUris": ["http://localhost/*"],
+    "webOrigins": ["http://localhost"]
+  }],
+  "users": [{
+    "username": "operator",
+    "enabled": true,
+    "emailVerified": true,
+    "email": "operator@ledgerflow.local",
+    "firstName": "Demo",
+    "lastName": "Operator",
+    "realmRoles": ["OPERATOR"],
+    "credentials": [{"type":"password","value":"operator123","temporary":false}]
+  }]
+}

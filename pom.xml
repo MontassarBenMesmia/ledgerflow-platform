@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.5.7</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>dev.ledgerflow</groupId>
+  <artifactId>ledgerflow-platform</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+
+  <name>LedgerFlow Platform</name>
+  <description>Event-driven double-entry ledger and reconciliation platform</description>
+
+  <modules>
+    <module>contracts</module>
+    <module>ledger-service</module>
+    <module>projection-service</module>
+  </modules>
+
+  <properties>
+    <java.version>17</java.version>
+    <testcontainers.version>1.21.3</testcontainers.version>
+    <jqwik.version>1.9.3</jqwik.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>testcontainers-bom</artifactId>
+        <version>${testcontainers.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>3.6.2</version>
+          <executions>
+            <execution>
+              <id>enforce-java</id>
+              <goals><goal>enforce</goal></goals>
+              <configuration>
+                <rules>
+                  <requireJavaVersion><version>[17,)</version></requireJavaVersion>
+                </rules>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>

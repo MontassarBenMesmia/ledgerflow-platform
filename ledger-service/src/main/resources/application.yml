@@ -1,0 +1,65 @@
+spring:
+  application:
+    name: ledger-service
+  datasource:
+    url: ${LEDGER_DB_URL:jdbc:postgresql://localhost:5432/ledger}
+    username: ${POSTGRES_USER:ledgerflow}
+    password: ${POSTGRES_PASSWORD:ledgerflow}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:19092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      properties:
+        enable.idempotence: true
+        acks: all
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:4200/realms/ledgerflow}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8081/realms/ledgerflow/protocol/openid-connect/certs}
+
+server:
+  port: 8080
+  forward-headers-strategy: framework
+
+ledger:
+  events:
+    topic: ledger.transfer.events
+  outbox:
+    publish-interval-ms: 1000
+  rate-limit-per-minute: 20
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318/v1/traces}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

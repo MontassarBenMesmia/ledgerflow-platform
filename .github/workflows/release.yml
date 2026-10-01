@@ -1,0 +1,16 @@
+name: Publish containers
+on: { push: { tags: ['v*'] } }
+permissions: { contents: read, packages: write, id-token: write }
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    strategy: { matrix: { component: [ledger-service, projection-service, frontend] } }
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/login-action@v3
+        with: { registry: ghcr.io, username: "${{ github.actor }}", password: "${{ secrets.GITHUB_TOKEN }}" }
+      - uses: docker/metadata-action@v5
+        id: meta
+        with: { images: "ghcr.io/montassarbenmesmia/ledgerflow-${{ matrix.component }}", tags: 'type=semver,pattern={{version}}' }
+      - uses: docker/build-push-action@v6
+        with: { context: ., file: "${{ matrix.component }}/Dockerfile", push: true, tags: "${{ steps.meta.outputs.tags }}", labels: "${{ steps.meta.outputs.labels }}" }

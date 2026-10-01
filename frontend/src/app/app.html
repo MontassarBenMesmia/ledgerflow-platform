@@ -1,0 +1,36 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">L</span><span>LedgerFlow</span></div>
+    <nav><a class="active">Overview</a><a>Accounts</a><a>Transfers</a><a>Reconciliation</a><a>Operations</a></nav>
+    <div class="environment"><span></span><div><small>Environment</small><strong>Local production</strong></div></div>
+  </aside>
+  <main>
+    <header><div><p class="eyebrow">FINANCIAL OPERATIONS</p><h1>Ledger overview</h1></div><div class="profile"><div class="avatar">{{ initials() }}</div><div><strong>{{ user() }}</strong><small>Operator</small></div><button (click)="logout()">Sign out</button></div></header>
+    <section class="status-bar"><div><span class="pulse"></span><strong>All systems operational</strong><small>Event processing is healthy</small></div><button (click)="refresh()" [disabled]="loading()">{{ loading() ? 'Refreshing…' : 'Refresh data' }}</button></section>
+    <section class="metrics">
+      <article><div class="metric-head"><span>Total balance</span><b>EUR</b></div><h2>{{ totalBalance() | currency:'EUR':'symbol':'1.2-2' }}</h2><p>Across {{ accounts().length }} settlement accounts</p></article>
+      <article><div class="metric-head"><span>Projected transfers</span><b class="teal">EVENTS</b></div><h2>{{ reconciliation()?.projectedTransfers ?? 0 }}</h2><p>{{ reconciliation()?.processedEvents ?? 0 }} events processed exactly once</p></article>
+      <article><div class="metric-head"><span>Reconciliation</span><b class="green">{{ reconciliation()?.status ?? 'CHECKING' }}</b></div><h2>{{ reconciliation()?.balancedTransfers ?? 0 }}</h2><p>Balanced double-entry postings</p></article>
+      <article><div class="metric-head"><span>Review queue</span><b class="violet">CONTROL</b></div><h2>{{ reconciliation()?.reviewRequired ?? 0 }}</h2><p>Transfers requiring investigation</p></article>
+    </section>
+    <div class="grid">
+      <section class="panel transfer-panel">
+        <div class="panel-title"><div><p class="eyebrow">NEW PAYMENT</p><h3>Post a transfer</h3></div><span class="shield">✓ Secured</span></div>
+        <form [formGroup]="form" (ngSubmit)="submitTransfer()">
+          <label>From account<select formControlName="sourceAccountId"><option *ngFor="let account of accounts()" [value]="account.id">{{ account.name }} — {{ account.balance | currency:'EUR' }}</option></select></label>
+          <label>To account<select formControlName="destinationAccountId"><option *ngFor="let account of accounts()" [value]="account.id">{{ account.name }} — {{ account.balance | currency:'EUR' }}</option></select></label>
+          <label>Amount<div class="amount"><span>€</span><input type="number" min="0.01" step="0.01" formControlName="amount"></div></label>
+          <button class="primary" type="submit" [disabled]="submitting()">{{ submitting() ? 'Posting…' : 'Post transfer' }} <span>→</span></button>
+          <p class="note">Idempotency protected · Double-entry verified · Audited</p>
+        </form><p class="message" *ngIf="message()">{{ message() }}</p>
+      </section>
+      <section class="panel activity-panel">
+        <div class="panel-title"><div><p class="eyebrow">EVENT STREAM</p><h3>Recent activity</h3></div><span class="live"><i></i> Live</span></div>
+        <div class="empty" *ngIf="!activity().length && !loading()"><div>↗</div><strong>No transfers yet</strong><span>Post a transfer to see the projection update.</span></div>
+        <div class="activity" *ngFor="let item of activity()"><div class="event-icon">↗</div><div class="route"><strong>{{ accountName(item.sourceAccountId) }} → {{ accountName(item.destinationAccountId) }}</strong><span>{{ item.occurredAt | date:'medium' }} · {{ item.initiatedBy }}</span></div><div class="event-amount"><strong>{{ item.amount | currency:item.currency }}</strong><span>{{ item.reconciliationStatus }}</span></div></div>
+      </section>
+    </div>
+    <section class="accounts"><div class="section-heading"><div><p class="eyebrow">LEDGER ACCOUNTS</p><h3>Account positions</h3></div><span>Updated just now</span></div><div class="account-grid"><article *ngFor="let account of accounts(); let i = index"><div class="account-icon" [class.alt]="i === 1" [class.third]="i === 2">{{ account.name[0] }}</div><div><span>{{ account.name }}</span><h3>{{ account.balance | currency:account.currency }}</h3><small>{{ account.id | slice:0:8 }}…</small></div></article></div></section>
+    <footer><span>LedgerFlow Platform</span><span>Immutable ledger · Transactional outbox · Event-driven projections</span></footer>
+  </main>
+</div>

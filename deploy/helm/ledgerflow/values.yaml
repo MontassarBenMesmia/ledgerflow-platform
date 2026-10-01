@@ -1,0 +1,27 @@
+image:
+  registry: ghcr.io/montassarbenmesmia
+  tag: latest
+replicas: 2
+config:
+  kafkaBootstrapServers: ledgerflow-kafka:9092
+  keycloakIssuerUri: https://ledgerflow.example.com/realms/ledgerflow
+  keycloakJwkSetUri: http://keycloak/realms/ledgerflow/protocol/openid-connect/certs
+secrets:
+  postgresUser: ledgerflow
+  postgresPassword: replace-me
+services:
+  ledger:
+    image: ledgerflow-ledger-service
+    port: 8080
+    databaseUrl: jdbc:postgresql://ledgerflow-postgres:5432/ledger
+  projection:
+    image: ledgerflow-projection-service
+    port: 8082
+    databaseUrl: jdbc:postgresql://ledgerflow-postgres:5432/projection
+  frontend:
+    image: ledgerflow-frontend
+    port: 80
+ingress:
+  enabled: false
+  className: nginx
+  host: ledgerflow.example.com

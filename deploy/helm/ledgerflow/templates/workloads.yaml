@@ -1,0 +1,39 @@
+{{- range $name, $service := .Values.services }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ledgerflow-{{ $name }}
+  labels: { app.kubernetes.io/name: ledgerflow-{{ $name }} }
+spec:
+  replicas: {{ $.Values.replicas }}
+  selector: { matchLabels: { app.kubernetes.io/name: ledgerflow-{{ $name }} } }
+  template:
+    metadata: { labels: { app.kubernetes.io/name: ledgerflow-{{ $name }} } }
+    spec:
+      securityContext: { runAsNonRoot: true }
+      containers:
+        - name: {{ $name }}
+          image: "{{ $.Values.image.registry }}/{{ $service.image }}:{{ $.Values.image.tag }}"
+          ports: [{ containerPort: {{ $service.port }} }]
+          securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: ["ALL"] } }
+          resources: { requests: { cpu: 100m, memory: 192Mi }, limits: { cpu: 750m, memory: 768Mi } }
+          {{- if ne $name "frontend" }}
+          env:
+            - { name: KAFKA_BOOTSTRAP_SERVERS, value: {{ $.Values.config.kafkaBootstrapServers | quote }} }
+            - { name: KEYCLOAK_ISSUER_URI, value: {{ $.Values.config.keycloakIssuerUri | quote }} }
+            - { name: KEYCLOAK_JWK_SET_URI, value: {{ $.Values.config.keycloakJwkSetUri | quote }} }
+            - { name: POSTGRES_USER, valueFrom: { secretKeyRef: { name: ledgerflow-database, key: username } } }
+            - { name: POSTGRES_PASSWORD, valueFrom: { secretKeyRef: { name: ledgerflow-database, key: password } } }
+            - { name: {{ if eq $name "ledger" }}LEDGER_DB_URL{{ else }}PROJECTION_DB_URL{{ end }}, value: {{ $service.databaseUrl | quote }} }
+          readinessProbe: { httpGet: { path: /actuator/health/readiness, port: {{ $service.port }} }, initialDelaySeconds: 20 }
+          livenessProbe: { httpGet: { path: /actuator/health/liveness, port: {{ $service.port }} }, initialDelaySeconds: 40 }
+          {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata: { name: ledgerflow-{{ $name }} }
+spec:
+  selector: { app.kubernetes.io/name: ledgerflow-{{ $name }} }
+  ports: [{ port: {{ $service.port }}, targetPort: {{ $service.port }} }]
+---
+{{- end }}
